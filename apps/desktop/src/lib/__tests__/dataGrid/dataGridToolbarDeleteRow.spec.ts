@@ -16,7 +16,9 @@ describe("data grid toolbar delete row", () => {
   });
 
   it("keeps the delete-row capability tied to row deletion state", () => {
-    expect(dataGridSource).toMatch(/visible: canDeleteRows\.value && canDeleteExistingRows\.value/);
+    expect(dataGridSource).toMatch(/deleteRowToolbarTargetCount = computed\(\(\) => deletableRowIds\(selectedOrCurrentRowIds\(\)\)\.length\)/);
+    expect(dataGridSource).toMatch(/visible: deleteRowToolbarState\.value\.visible/);
+    expect(dataGridSource).toMatch(/disabled: deleteRowToolbarState\.value\.disabled/);
     expect(dataGridSource).toMatch(/onTrigger: \(\) => \{\s*deleteCurrentRow\(\);/);
   });
 });

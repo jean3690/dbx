@@ -215,7 +215,16 @@ import { useQueryStore } from "@/stores/queryStore";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { simpleDataGridOrderByMatchesSort, simpleDataGridOrderByReferencesMissingColumn, type DataGridSortDirection, type DataGridSortMode } from "@/lib/dataGrid/dataGridSort";
 import { buildOrderedGridRows, type GridInsertRowPosition, type GridNewRowPlacement } from "@/lib/dataGrid/gridNewRowPlacement";
-import { DATA_GRID_CONDITION_TOOLBAR_MIN_WIDTH, isDataGridToolbarCompact, type DataGridReloadIntent, type DataGridToolbarActionCapability, type DataGridToolbarAddRowCapability, type DataGridToolbarAutoRefreshCapability, type DataGridToolbarSaveCapability } from "@/lib/dataGrid/dataGridToolbar";
+import {
+  DATA_GRID_CONDITION_TOOLBAR_MIN_WIDTH,
+  dataGridDeleteRowToolbarState,
+  isDataGridToolbarCompact,
+  type DataGridReloadIntent,
+  type DataGridToolbarActionCapability,
+  type DataGridToolbarAddRowCapability,
+  type DataGridToolbarAutoRefreshCapability,
+  type DataGridToolbarSaveCapability,
+} from "@/lib/dataGrid/dataGridToolbar";
 import { getTableMetadataCapabilities } from "@/lib/table/tableMetadataCapabilities";
 import { getTableStructureCapabilities } from "@/lib/table/tableStructureCapabilities";
 import { filterObjectBrowserTableColumns } from "@/lib/table/objectBrowserTableInfo";
@@ -3416,11 +3425,21 @@ const addRowToolbarCapability = computed<DataGridToolbarAddRowCapability>(() => 
   onTrigger: addRow,
   onSelect: handleAddRowMenuSelect,
 }));
+const deleteRowToolbarTargetCount = computed(() => deletableRowIds(selectedOrCurrentRowIds()).length);
+const deleteRowToolbarState = computed(() =>
+  dataGridDeleteRowToolbarState({
+    editable: !!props.editable,
+    canDeleteRows: canDeleteRows.value,
+    canDeleteExistingRows: canDeleteExistingRows.value,
+    deletableTargetCount: deleteRowToolbarTargetCount.value,
+    isSaving: isSaving.value,
+  }),
+);
 const deleteRowToolbarCapability = computed<DataGridToolbarActionCapability>(() => ({
-  label: isMultiRow.value ? t("grid.deleteRows", { count: multiRowCount.value }) : t("grid.deleteRow"),
+  label: deleteRowToolbarTargetCount.value > 1 ? t("grid.deleteRows", { count: deleteRowToolbarTargetCount.value }) : t("grid.deleteRow"),
   tooltip: `${t("grid.deleteRow")} (${formatShortcut(settingsStore.editorSettings.shortcuts.deleteCurrentRow)})`,
-  visible: canDeleteRows.value && canDeleteExistingRows.value,
-  disabled: isSaving.value,
+  visible: deleteRowToolbarState.value.visible,
+  disabled: deleteRowToolbarState.value.disabled,
   onTrigger: () => {
     deleteCurrentRow();
   },
