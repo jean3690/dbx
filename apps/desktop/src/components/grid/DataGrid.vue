@@ -3416,6 +3416,15 @@ const addRowToolbarCapability = computed<DataGridToolbarAddRowCapability>(() => 
   onTrigger: addRow,
   onSelect: handleAddRowMenuSelect,
 }));
+const deleteRowToolbarCapability = computed<DataGridToolbarActionCapability>(() => ({
+  label: isMultiRow.value ? t("grid.deleteRows", { count: multiRowCount.value }) : t("grid.deleteRow"),
+  tooltip: `${t("grid.deleteRow")} (${formatShortcut(settingsStore.editorSettings.shortcuts.deleteCurrentRow)})`,
+  visible: canDeleteRows.value && canDeleteExistingRows.value,
+  disabled: isSaving.value,
+  onTrigger: () => {
+    deleteCurrentRow();
+  },
+}));
 const previewToolbarCapability = computed<DataGridToolbarActionCapability>(() => ({
   label: t(previewLabelKey.value),
   visible: saveToolbarState.value.showActions && pendingChangeCount.value > 0,
@@ -8479,6 +8488,7 @@ const gridContextMenuItems = computed<ContextMenuItem[]>(() => {
             :refresh="refreshToolbarCapability"
             :auto-refresh="autoRefreshToolbarCapability"
             :add-row="addRowToolbarCapability"
+            :delete-row="deleteRowToolbarCapability"
             :preview="previewToolbarCapability"
             :save="saveToolbarCapability"
             :rollback="rollbackToolbarCapability"
